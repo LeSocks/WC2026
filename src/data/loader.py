@@ -75,7 +75,7 @@ def _team_from_payload(payload: dict[str, object]) -> Team:
     return Team(
         name=str(payload["name"]),
         squad=[Player.from_mapping(row) for row in squad_payload],
-        fifa_rank=None,
+        fifa_rank=int(payload["fifa_rank"]) if payload.get("fifa_rank") is not None else None,
         tactical_config=TacticalConfig(
             formation=str(tactics["formation"]),
             press_style=PressStyle(str(tactics["press_style"])),

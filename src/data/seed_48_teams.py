@@ -6,7 +6,16 @@ from pathlib import Path
 import pandas as pd
 
 from src.data.seed_top10_ratings import build_player_ratings_dataframe
-from src.data.worldcup_2026 import CONFEDERATIONS, TEAM_STRENGTHS, WORLD_CUP_GROUPS, all_teams, team_group
+from src.data.worldcup_2026 import (
+    CONFEDERATIONS,
+    FIFA_RANKING_DATE,
+    FIFA_RANKING_SOURCE,
+    FIFA_RANKINGS_2026_06_11,
+    TEAM_STRENGTHS,
+    WORLD_CUP_GROUPS,
+    all_teams,
+    team_group,
+)
 from src.engine.tactics import AttackStyle, PressStyle, TacticalConfig, TACTICAL_PRESETS
 
 
@@ -49,6 +58,9 @@ def build_all_players_dataframe() -> pd.DataFrame:
             team_rows = manual_players[manual_players["team"] == team].copy()
             team_rows["group"] = team_group(team)
             team_rows["confederation"] = CONFEDERATIONS[team]
+            team_rows["fifa_rank"] = FIFA_RANKINGS_2026_06_11[team]
+            team_rows["ranking_date"] = FIFA_RANKING_DATE
+            team_rows["ranking_source"] = FIFA_RANKING_SOURCE
             team_rows["data_quality"] = "tier1_manual_seed"
             rows.extend(team_rows.to_dict(orient="records"))
             continue
@@ -76,6 +88,7 @@ def build_all_players_dataframe() -> pd.DataFrame:
             "playstyle",
             "ratings_source",
             "ranking_date",
+            "ranking_source",
             "data_quality",
         ]
     ].sort_values(["group", "team", "position", "player_name"])
@@ -93,6 +106,9 @@ def build_all_teams_payload() -> dict[str, object]:
                 "name": team,
                 "group": team_group(team),
                 "confederation": CONFEDERATIONS[team],
+                "fifa_rank": FIFA_RANKINGS_2026_06_11[team],
+                "ranking_date": FIFA_RANKING_DATE,
+                "ranking_source": FIFA_RANKING_SOURCE,
                 "team_strength": TEAM_STRENGTHS[team],
                 "data_quality": "tier1_manual_seed" if team in set(build_player_ratings_dataframe()["team"]) else DATA_QUALITY,
                 "tactics": {
@@ -110,7 +126,9 @@ def build_all_teams_payload() -> dict[str, object]:
 
     return {
         "schema_version": 1,
-        "source_note": "WC2026 groups verified from current tournament schedule; non-top-10 squads are generated Tier 1 placeholders.",
+        "source_note": "WC2026 groups verified from current tournament schedule; FIFA ranks are official 2026-06-11 ranks mirrored by Sofascore; non-top-10 squads are generated Tier 1 placeholders.",
+        "ranking_date": FIFA_RANKING_DATE,
+        "ranking_source": FIFA_RANKING_SOURCE,
         "groups": WORLD_CUP_GROUPS,
         "teams": teams,
     }
@@ -127,7 +145,7 @@ def write_seed_data(
 
     players = build_all_players_dataframe()
     players.to_csv(players_output, index=False)
-    teams_output.write_text(json.dumps(build_all_teams_payload(), indent=2), encoding="utf-8")
+    teams_output.write_text(json.dumps(build_all_teams_payload(), indent=2, allow_nan=False), encoding="utf-8")
 
     return {"teams": teams_output, "players": players_output}
 
@@ -171,7 +189,7 @@ def _generated_team_players(team: str) -> list[dict[str, object]]:
                 "team": team,
                 "group": group,
                 "confederation": confederation,
-                "fifa_rank": None,
+                "fifa_rank": FIFA_RANKINGS_2026_06_11[team],
                 "player_name": f"{team} {role_name}",
                 "position": position,
                 "age": _age_for_slot(index),
@@ -185,7 +203,8 @@ def _generated_team_players(team: str) -> list[dict[str, object]]:
                 "overall": _stat(strength, offsets["overall"]),
                 "playstyle": offsets["playstyle"],
                 "ratings_source": "generated_team_profile",
-                "ranking_date": "2026-06-11",
+                "ranking_date": FIFA_RANKING_DATE,
+                "ranking_source": FIFA_RANKING_SOURCE,
                 "data_quality": DATA_QUALITY,
             }
         )

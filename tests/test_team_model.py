@@ -18,6 +18,29 @@ def test_formations_have_eleven_slots_and_coordinates() -> None:
         assert formation.slots[0] == Position.GK
 
 
+def test_expanded_formation_catalog_is_available() -> None:
+    expected_formations = {
+        "4-3-3",
+        "4-2-3-1",
+        "4-5-1",
+        "3-4-3",
+        "4-4-2",
+        "4-1-4-1",
+        "4-3-2-1",
+        "4-3-1-2",
+        "4-2-2-2",
+        "4-1-2-1-2",
+        "3-5-2",
+        "3-4-2-1",
+        "3-4-1-2",
+        "5-3-2",
+        "5-4-1",
+        "5-2-3",
+    }
+
+    assert expected_formations.issubset(FORMATIONS)
+
+
 def test_team_lineup_can_be_printed() -> None:
     france = load_team("France")
     lineup = france.lineup_text()

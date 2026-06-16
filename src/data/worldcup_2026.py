@@ -69,6 +69,61 @@ CONFEDERATIONS: dict[str, str] = {
 }
 
 
+FIFA_RANKING_DATE = "2026-06-11"
+FIFA_RANKING_SOURCE = "FIFA official ranking, mirrored by Sofascore"
+
+FIFA_RANKINGS_2026_06_11: dict[str, int] = {
+    "Argentina": 1,
+    "Spain": 2,
+    "France": 3,
+    "England": 4,
+    "Portugal": 5,
+    "Brazil": 6,
+    "Morocco": 7,
+    "Netherlands": 8,
+    "Belgium": 9,
+    "Germany": 10,
+    "Croatia": 11,
+    "Colombia": 13,
+    "Mexico": 14,
+    "Senegal": 15,
+    "Uruguay": 16,
+    "United States": 17,
+    "Japan": 18,
+    "Switzerland": 19,
+    "Iran": 20,
+    "Turkiye": 22,
+    "Ecuador": 23,
+    "Austria": 24,
+    "South Korea": 25,
+    "Australia": 27,
+    "Algeria": 28,
+    "Egypt": 29,
+    "Canada": 30,
+    "Norway": 31,
+    "Ivory Coast": 33,
+    "Panama": 34,
+    "Sweden": 38,
+    "Czechia": 40,
+    "Paraguay": 41,
+    "Scotland": 42,
+    "Tunisia": 45,
+    "DR Congo": 46,
+    "Uzbekistan": 50,
+    "Qatar": 56,
+    "Iraq": 57,
+    "South Africa": 60,
+    "Saudi Arabia": 61,
+    "Jordan": 63,
+    "Bosnia and Herzegovina": 64,
+    "Cape Verde": 67,
+    "Ghana": 73,
+    "Curacao": 82,
+    "Haiti": 83,
+    "New Zealand": 85,
+}
+
+
 TEAM_STRENGTHS: dict[str, int] = {
     "Argentina": 90,
     "Spain": 90,
