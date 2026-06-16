@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+import math
 from typing import Any
 
 
@@ -214,11 +215,15 @@ def _clamp(value: float, lower: float, upper: float) -> float:
 def _optional_int(value: Any) -> int | None:
     if value is None or value == "":
         return None
+    if isinstance(value, float) and math.isnan(value):
+        return None
     return int(value)
 
 
 def _optional_str(value: Any) -> str | None:
     if value is None or value == "":
+        return None
+    if isinstance(value, float) and math.isnan(value):
         return None
     return str(value)
 

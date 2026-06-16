@@ -5,7 +5,7 @@ from typing import Optional
 import numpy as np
 
 from src.engine.events import EventType, MatchEvent, MatchState, PitchZone
-from src.engine.tactics import AttackStyle, PressStyle
+from src.engine.tactics import TacticalEngine
 from src.models.player import PlayStyle, Position
 from src.models.team import Team
 
@@ -16,6 +16,7 @@ class MatchSimulator:
         self.away = away_team
         self.rng = np.random.default_rng(rng_seed)
         self.state = MatchState()
+        self.tactical_engine = TacticalEngine()
         self._home_possession_minutes = 0
         self._away_possession_minutes = 0
         self._half_time_recorded = False
@@ -35,7 +36,7 @@ class MatchSimulator:
             )
         )
 
-        home_possession_tendency = self._compute_possession_tendency()
+        home_possession_tendency = self.tactical_engine.compute_possession_tendency(self.home, self.away)
 
         self._simulate_period(period_end=45, home_possession_tendency=home_possession_tendency)
         self._half_time_recorded = True
@@ -123,7 +124,7 @@ class MatchSimulator:
                 event, success = self._resolve_pass(player, team, opponent, current_zone, chain_minute, home_possession_tendency)
                 events.append(event)
                 if success:
-                    current_zone = self._advance_zone(current_zone, team)
+                    current_zone = self.tactical_engine.transition_zone(current_zone, team, "pass")
                     self.state.current_zone = current_zone
                 else:
                     self.state.possession_team = opponent.name
@@ -134,7 +135,7 @@ class MatchSimulator:
                 event, success = self._resolve_dribble(player, team, opponent, current_zone, chain_minute)
                 events.append(event)
                 if success:
-                    current_zone = self._advance_zone(current_zone, team)
+                    current_zone = self.tactical_engine.transition_zone(current_zone, team, "dribble")
                     self.state.current_zone = current_zone
                 else:
                     self.state.possession_team = opponent.name
@@ -147,39 +148,9 @@ class MatchSimulator:
         return chain_duration, events
 
     def _choose_action(self, player, team: Team, zone: PitchZone) -> str:
-        zone_probs = {
-            PitchZone.DEF_LEFT: {"pass": 0.82, "dribble": 0.15, "shoot": 0.03},
-            PitchZone.DEF_CENTER: {"pass": 0.88, "dribble": 0.11, "shoot": 0.01},
-            PitchZone.DEF_RIGHT: {"pass": 0.82, "dribble": 0.15, "shoot": 0.03},
-            PitchZone.MID_LEFT: {"pass": 0.70, "dribble": 0.25, "shoot": 0.05},
-            PitchZone.MID_CENTER: {"pass": 0.70, "dribble": 0.23, "shoot": 0.07},
-            PitchZone.MID_RIGHT: {"pass": 0.70, "dribble": 0.25, "shoot": 0.05},
-            PitchZone.ATT_LEFT: {"pass": 0.52, "dribble": 0.30, "shoot": 0.18},
-            PitchZone.ATT_CENTER: {"pass": 0.44, "dribble": 0.24, "shoot": 0.32},
-            PitchZone.ATT_RIGHT: {"pass": 0.52, "dribble": 0.30, "shoot": 0.18},
-        }
-        probs = dict(zone_probs[zone])
-
-        if player.playstyle == PlayStyle.POACHER and zone == PitchZone.ATT_CENTER:
-            probs["shoot"] *= 1.35
-        elif player.playstyle == PlayStyle.DRIBBLER:
-            probs["dribble"] *= 1.25
-        elif player.playstyle in {PlayStyle.DEEP_LYING_PM, PlayStyle.CREATOR}:
-            probs["pass"] *= 1.18
-
-        if team.tactical_config.attack_style == AttackStyle.DIRECT:
-            probs["pass"] *= 0.88
-            probs["shoot"] *= 1.18
-        elif team.tactical_config.attack_style == AttackStyle.POSSESSION:
-            probs["pass"] *= 1.18
-            probs["shoot"] *= 0.90
-        elif team.tactical_config.attack_style == AttackStyle.COUNTER_ATTACK:
-            probs["dribble"] *= 1.10
-            probs["shoot"] *= 1.08
-
-        total = sum(probs.values())
+        probs = self.tactical_engine.action_probabilities(player, team, zone)
         actions = list(probs)
-        weights = [probs[action] / total for action in actions]
+        weights = [probs[action] for action in actions]
         return str(self.rng.choice(actions, p=weights))
 
     def _resolve_pass(
@@ -191,9 +162,14 @@ class MatchSimulator:
         minute: int,
         home_possession_tendency: float,
     ) -> tuple[MatchEvent, bool]:
-        opponent_pressure = opponent.tactical_config.pressing_intensity * 0.12
-        possession_bonus = (home_possession_tendency - 0.5) * 0.08 if team.name == self.home.name else (0.5 - home_possession_tendency) * 0.08
-        probability = player.pass_success_rate - opponent_pressure + possession_bonus
+        modifier = self.tactical_engine.pass_success_modifier(
+            team,
+            opponent,
+            zone,
+            home_possession_tendency,
+            is_home=team.name == self.home.name,
+        )
+        probability = player.pass_success_rate + modifier
         probability = float(np.clip(probability, 0.35, 0.95))
         success = bool(self.rng.random() < probability)
         event_type = EventType.PASS if success else EventType.INTERCEPTION
@@ -217,7 +193,7 @@ class MatchSimulator:
         )
 
     def _resolve_dribble(self, player, team: Team, opponent: Team, zone: PitchZone, minute: int) -> tuple[MatchEvent, bool]:
-        pressure = opponent.tactical_config.pressing_intensity * 0.10
+        pressure = self.tactical_engine.pressure_modifier(opponent, zone) * 0.085
         physical_bonus = (player.stats.physical - 70) / 1000
         probability = float(np.clip(player.dribble_success_rate - pressure + physical_bonus, 0.25, 0.86))
         success = bool(self.rng.random() < probability)
@@ -337,36 +313,6 @@ class MatchSimulator:
         defensive_shape = opponent.defensive_quality / 100
         central_bonus = 0.08 if zone == PitchZone.ATT_CENTER else 0.03
         return float(np.clip(0.16 + defensive_shape * 0.18 + central_bonus, 0.16, 0.42))
-
-    def _compute_possession_tendency(self) -> float:
-        home_quality = self.home.passing_quality + (self.home.tactical_config.tempo * 6)
-        away_quality = self.away.passing_quality + (self.away.tactical_config.tempo * 6)
-
-        if self.home.tactical_config.attack_style == AttackStyle.POSSESSION:
-            home_quality += 4
-        if self.away.tactical_config.attack_style == AttackStyle.POSSESSION:
-            away_quality += 4
-        if self.home.tactical_config.press_style in {PressStyle.HIGH_PRESS, PressStyle.COUNTER_PRESS}:
-            home_quality += 2
-        if self.away.tactical_config.press_style in {PressStyle.HIGH_PRESS, PressStyle.COUNTER_PRESS}:
-            away_quality += 2
-
-        return float(np.clip(home_quality / (home_quality + away_quality), 0.35, 0.65))
-
-    def _advance_zone(self, zone: PitchZone, team: Team) -> PitchZone:
-        direct = team.tactical_config.attack_style in {AttackStyle.DIRECT, AttackStyle.COUNTER_ATTACK}
-        transitions = {
-            PitchZone.DEF_LEFT: PitchZone.MID_LEFT,
-            PitchZone.DEF_CENTER: PitchZone.MID_CENTER,
-            PitchZone.DEF_RIGHT: PitchZone.MID_RIGHT,
-            PitchZone.MID_LEFT: PitchZone.ATT_LEFT if not direct else PitchZone.ATT_CENTER,
-            PitchZone.MID_CENTER: PitchZone.ATT_CENTER,
-            PitchZone.MID_RIGHT: PitchZone.ATT_RIGHT if not direct else PitchZone.ATT_CENTER,
-            PitchZone.ATT_LEFT: PitchZone.ATT_CENTER,
-            PitchZone.ATT_CENTER: PitchZone.ATT_CENTER,
-            PitchZone.ATT_RIGHT: PitchZone.ATT_CENTER,
-        }
-        return transitions[zone]
 
     def _flip_zone(self, zone: PitchZone) -> PitchZone:
         mapping = {

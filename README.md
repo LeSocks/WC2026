@@ -49,6 +49,18 @@ Agent-based football simulation and World Cup 2026 tournament predictor.
 - Run top-10 matchup samples to check goals, shots, SOT, xG, and high-score outliers.
 - Add a short development journal under `docs/`.
 
+## Day 8 Scope
+
+- Move tactical formulas into `TacticalEngine`.
+- Add pressure modifiers, action probabilities, possession tendency, and transition logic.
+- Make tactical style differences directly testable.
+
+## Day 9 Scope
+
+- Add WC2026 group metadata for all 48 teams.
+- Generate Tier 1 starter data for all teams into `data/processed/`.
+- Keep top-10 manual seed data and use generated team-profile placeholders for the remaining teams.
+
 ## Setup
 
 ```powershell
@@ -118,4 +130,22 @@ Run Day 7 diagnostics:
 
 ```powershell
 python -m src.engine.diagnostics --runs-per-pair 20
+```
+
+Run diagnostics across all 48 teams:
+
+```powershell
+python -m src.engine.diagnostics --runs-per-pair 5 --all-teams
+```
+
+Regenerate all 48-team processed data:
+
+```powershell
+python -m src.data.seed_48_teams
+```
+
+Check default full dataset loading:
+
+```powershell
+python -c "from src.data.loader import load_all_teams, load_players; print(len(load_all_teams()), len(load_players()))"
 ```

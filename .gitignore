@@ -14,4 +14,6 @@ data/squads/*
 !data/raw/fifa_style_player_ratings_top10.csv
 !data/raw/fbref_team_sources.csv
 !data/processed/.gitkeep
+!data/processed/all_teams.json
+!data/processed/all_players_48.csv
 !data/squads/.gitkeep

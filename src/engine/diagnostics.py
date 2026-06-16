@@ -12,6 +12,20 @@ from src.engine.match import MatchSimulator
 from src.models.team import Team
 
 
+DEFAULT_DIAGNOSTIC_TEAMS = [
+    "Argentina",
+    "Spain",
+    "France",
+    "England",
+    "Portugal",
+    "Brazil",
+    "Morocco",
+    "Netherlands",
+    "Belgium",
+    "Germany",
+]
+
+
 def summarize_matchup(
     home_team: Team,
     away_team: Team,
@@ -118,11 +132,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run match-engine distribution diagnostics.")
     parser.add_argument("--runs-per-pair", type=int, default=20)
     parser.add_argument("--teams", nargs="*", help="Optional subset of team names.")
+    parser.add_argument("--all-teams", action="store_true", help="Run every loaded team instead of the default top-10 subset.")
     parser.add_argument("--output", type=Path, help="Optional CSV output path.")
     args = parser.parse_args()
 
     teams = load_all_teams()
-    results = run_pair_grid(teams, runs_per_pair=args.runs_per_pair, team_names=args.teams)
+    team_names = args.teams if args.teams else None if args.all_teams else DEFAULT_DIAGNOSTIC_TEAMS
+    results = run_pair_grid(teams, runs_per_pair=args.runs_per_pair, team_names=team_names)
     summary = aggregate_diagnostics(results)
 
     print(pd.DataFrame([summary]).to_string(index=False))

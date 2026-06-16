@@ -1,11 +1,11 @@
-from src.data.loader import load_all_teams, load_team
+from src.data.loader import DEFAULT_PLAYER_RATINGS_PATH, load_all_teams, load_team
 from src.engine.tactics import TACTICAL_PRESETS
 from src.models.formation import FORMATIONS
 from src.models.player import Position
 
 
 def test_tactical_presets_cover_seeded_top10_teams() -> None:
-    teams = load_all_teams()
+    teams = load_all_teams(DEFAULT_PLAYER_RATINGS_PATH)
 
     assert set(teams) == set(TACTICAL_PRESETS)
     assert len(teams) == 10

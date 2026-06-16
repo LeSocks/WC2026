@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+import numpy as np
+
+from src.engine.events import PitchZone
+
 
 class PressStyle(Enum):
     HIGH_PRESS = "high_press"
@@ -127,3 +131,108 @@ TACTICAL_PRESETS: dict[str, TacticalConfig] = {
         tempo=0.70,
     ),
 }
+
+
+class TacticalEngine:
+    def compute_possession_tendency(self, home_team, away_team) -> float:
+        home_quality = self._possession_quality(home_team)
+        away_quality = self._possession_quality(away_team)
+        return float(np.clip(home_quality / (home_quality + away_quality), 0.35, 0.65))
+
+    def pressure_modifier(self, pressing_team, zone: PitchZone) -> float:
+        style_multiplier = {
+            PressStyle.HIGH_PRESS: 1.20,
+            PressStyle.COUNTER_PRESS: 1.12,
+            PressStyle.MID_BLOCK: 0.92,
+            PressStyle.LOW_BLOCK: 0.70,
+        }[pressing_team.tactical_config.press_style]
+        zone_multiplier = {
+            PitchZone.DEF_LEFT: 0.78,
+            PitchZone.DEF_CENTER: 0.78,
+            PitchZone.DEF_RIGHT: 0.78,
+            PitchZone.MID_LEFT: 1.00,
+            PitchZone.MID_CENTER: 1.06,
+            PitchZone.MID_RIGHT: 1.00,
+            PitchZone.ATT_LEFT: 1.12,
+            PitchZone.ATT_CENTER: 1.16,
+            PitchZone.ATT_RIGHT: 1.12,
+        }[zone]
+        line_bonus = 0.84 + pressing_team.tactical_config.defensive_line_height * 0.32
+        return float(pressing_team.tactical_config.pressing_intensity * style_multiplier * zone_multiplier * line_bonus)
+
+    def transition_zone(self, zone: PitchZone, team, action: str) -> PitchZone:
+        direct = team.tactical_config.attack_style in {AttackStyle.DIRECT, AttackStyle.COUNTER_ATTACK}
+        if action == "dribble" and zone in {PitchZone.ATT_LEFT, PitchZone.ATT_RIGHT}:
+            return PitchZone.ATT_CENTER
+
+        transitions = {
+            PitchZone.DEF_LEFT: PitchZone.MID_LEFT,
+            PitchZone.DEF_CENTER: PitchZone.MID_CENTER,
+            PitchZone.DEF_RIGHT: PitchZone.MID_RIGHT,
+            PitchZone.MID_LEFT: PitchZone.ATT_CENTER if direct else PitchZone.ATT_LEFT,
+            PitchZone.MID_CENTER: PitchZone.ATT_CENTER,
+            PitchZone.MID_RIGHT: PitchZone.ATT_CENTER if direct else PitchZone.ATT_RIGHT,
+            PitchZone.ATT_LEFT: PitchZone.ATT_CENTER,
+            PitchZone.ATT_CENTER: PitchZone.ATT_CENTER,
+            PitchZone.ATT_RIGHT: PitchZone.ATT_CENTER,
+        }
+        return transitions[zone]
+
+    def action_probabilities(self, player, team, zone: PitchZone) -> dict[str, float]:
+        zone_probs = {
+            PitchZone.DEF_LEFT: {"pass": 0.82, "dribble": 0.15, "shoot": 0.03},
+            PitchZone.DEF_CENTER: {"pass": 0.88, "dribble": 0.11, "shoot": 0.01},
+            PitchZone.DEF_RIGHT: {"pass": 0.82, "dribble": 0.15, "shoot": 0.03},
+            PitchZone.MID_LEFT: {"pass": 0.70, "dribble": 0.25, "shoot": 0.05},
+            PitchZone.MID_CENTER: {"pass": 0.70, "dribble": 0.23, "shoot": 0.07},
+            PitchZone.MID_RIGHT: {"pass": 0.70, "dribble": 0.25, "shoot": 0.05},
+            PitchZone.ATT_LEFT: {"pass": 0.52, "dribble": 0.30, "shoot": 0.18},
+            PitchZone.ATT_CENTER: {"pass": 0.44, "dribble": 0.24, "shoot": 0.32},
+            PitchZone.ATT_RIGHT: {"pass": 0.52, "dribble": 0.30, "shoot": 0.18},
+        }
+        probs = dict(zone_probs[zone])
+
+        playstyle = getattr(player, "playstyle", None)
+        playstyle_value = getattr(playstyle, "value", "")
+        if playstyle_value == "poacher" and zone == PitchZone.ATT_CENTER:
+            probs["shoot"] *= 1.35
+        elif playstyle_value == "dribbler":
+            probs["dribble"] *= 1.25
+        elif playstyle_value in {"deep_lying_pm", "creator"}:
+            probs["pass"] *= 1.18
+
+        if team.tactical_config.attack_style == AttackStyle.DIRECT:
+            probs["pass"] *= 0.88
+            probs["shoot"] *= 1.18
+        elif team.tactical_config.attack_style == AttackStyle.POSSESSION:
+            probs["pass"] *= 1.18
+            probs["shoot"] *= 0.90
+        elif team.tactical_config.attack_style == AttackStyle.COUNTER_ATTACK:
+            probs["dribble"] *= 1.10
+            probs["shoot"] *= 1.08
+
+        total = sum(probs.values())
+        return {action: value / total for action, value in probs.items()}
+
+    def pass_success_modifier(self, team, opponent, zone: PitchZone, home_possession_tendency: float, is_home: bool) -> float:
+        pressure = self.pressure_modifier(opponent, zone)
+        possession_bonus = (home_possession_tendency - 0.5) * 0.08 if is_home else (0.5 - home_possession_tendency) * 0.08
+        tempo_penalty = max(0.0, team.tactical_config.tempo - 0.72) * 0.07
+        return float(possession_bonus - pressure * 0.10 - tempo_penalty)
+
+    def dribble_success_modifier(self, opponent, zone: PitchZone) -> float:
+        return float(-(self.pressure_modifier(opponent, zone) * 0.085))
+
+    def _possession_quality(self, team) -> float:
+        quality = team.passing_quality + (team.tactical_config.tempo * 6)
+        if team.tactical_config.attack_style == AttackStyle.POSSESSION:
+            quality += 4
+        elif team.tactical_config.attack_style == AttackStyle.COUNTER_ATTACK:
+            quality -= 2
+
+        if team.tactical_config.press_style in {PressStyle.HIGH_PRESS, PressStyle.COUNTER_PRESS}:
+            quality += 2
+        elif team.tactical_config.press_style == PressStyle.LOW_BLOCK:
+            quality -= 1
+
+        return max(1.0, quality)

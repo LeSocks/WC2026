@@ -57,6 +57,22 @@ Short build journal for the first week. The goal is to preserve the main trials,
 - Outliers: 17 high-score matches at 7+ total goals out of 900 runs, about 1.9%.
 - Decision: no Day 7 scoring patch was needed after the diagnostic run; the current parameters are stable enough for Week 2 tactical-system work.
 
+## Day 8 - Tactical Engine
+
+- Scope: moved tactical formulas out of `MatchSimulator` and into a reusable `TacticalEngine`.
+- Trial: compared high press vs low block, possession vs direct attack, and direct transition behavior through focused unit tests.
+- Error avoided: keeping tactical formulas inline in `match.py` would make Week 2 tuning hard to isolate.
+- Fix: centralized possession tendency, pressure modifier, action probability, pass/dribble modifiers, and zone transition in `src/engine/tactics.py`.
+- Result: tactical styles now produce testable differences before running full match simulations.
+
+## Day 9 - Full 48-Team Tier 1 Data
+
+- Scope: added all 12 WC2026 groups and generated a complete 48-team Tier 1 dataset.
+- Trial: verified the group list against current tournament schedule pages before encoding the metadata.
+- Constraint: only the top-10 teams currently have manual starter ratings; the other 38 teams use generated placeholders from team-level strength profiles.
+- Fix: wrote `src/data/seed_48_teams.py` to generate `data/processed/all_teams.json` and `data/processed/all_players_48.csv` reproducibly.
+- Result: loader defaults now return 48 teams and 528 players when processed data exists.
+
 ## Git and Account Notes
 
 - Initial commit was rewritten because the Git author used the old GitHub identity.
