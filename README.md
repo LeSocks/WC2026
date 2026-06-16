@@ -24,6 +24,18 @@ Agent-based football simulation and World Cup 2026 tournament predictor.
 - Add playstyle modifiers for player differentiation.
 - Load Day 2 CSV rows into typed `Player` objects.
 
+## Day 4 Scope
+
+- Implement `Team`, `Formation`, and tactical presets for the 10 seeded teams.
+- Add lineup ordering from formation slots.
+- Expose team quality metrics for the match engine.
+
+## Day 5 Scope
+
+- Implement event types, match state, and a basic possession-chain simulator.
+- Resolve pass, dribble, interception, tackle, shot, save, miss, and goal events.
+- Add a terminal command for running one simulated match with an event log.
+
 ## Setup
 
 ```powershell
@@ -69,4 +81,16 @@ Load seeded players:
 
 ```powershell
 python -c "from src.data.loader import load_players; print(len(load_players()))"
+```
+
+Print a team lineup:
+
+```powershell
+python -c "from src.data.loader import load_team; print(load_team('France').lineup_text())"
+```
+
+Run one simulated match:
+
+```powershell
+python -m src.engine.run_match France Morocco --seed 42
 ```
