@@ -1,0 +1,111 @@
+team,fifa_rank,player_name,position,age,is_starter,pace,shooting,passing,dribbling,defending,physical,overall,playstyle,ratings_source,ranking_date
+Argentina,1,Cristian Romero,CB,28,True,73,43,69,69,87,86,86,stopper,manual_seed_estimate,2026-06-11
+Argentina,1,Nicolas Otamendi,CB,38,True,55,47,69,64,84,82,82,stopper,manual_seed_estimate,2026-06-11
+Argentina,1,Alexis Mac Allister,CM,27,True,75,78,85,84,76,76,86,box_to_box,manual_seed_estimate,2026-06-11
+Argentina,1,Enzo Fernandez,CM,25,True,72,76,86,83,78,78,86,deep_lying_pm,manual_seed_estimate,2026-06-11
+Argentina,1,Rodrigo De Paul,CM,32,True,76,75,84,82,79,82,85,box_to_box,manual_seed_estimate,2026-06-11
+Argentina,1,Emiliano Martinez,GK,33,True,52,25,72,63,88,86,88,traditional_gk,manual_seed_estimate,2026-06-11
+Argentina,1,Nicolas Tagliafico,LB,33,True,74,59,76,77,82,78,82,full_back,manual_seed_estimate,2026-06-11
+Argentina,1,Nahuel Molina,RB,28,True,83,66,78,80,80,77,82,wing_back,manual_seed_estimate,2026-06-11
+Argentina,1,Lionel Messi,RW,38,True,77,88,91,94,35,65,90,creator,manual_seed_estimate,2026-06-11
+Argentina,1,Julian Alvarez,ST,26,True,86,84,80,85,56,78,86,pressing_forward,manual_seed_estimate,2026-06-11
+Argentina,1,Lautaro Martinez,ST,28,True,82,87,75,84,55,84,88,poacher,manual_seed_estimate,2026-06-11
+Spain,2,Aymeric Laporte,CB,32,True,62,50,82,76,86,80,86,ball_playing_cb,manual_seed_estimate,2026-06-11
+Spain,2,Robin Le Normand,CB,29,True,66,39,73,70,84,82,84,ball_playing_cb,manual_seed_estimate,2026-06-11
+Spain,2,Rodri,CDM,29,True,66,80,90,84,88,86,91,deep_lying_pm,manual_seed_estimate,2026-06-11
+Spain,2,Fabian Ruiz,CM,30,True,70,79,86,84,77,78,86,box_to_box,manual_seed_estimate,2026-06-11
+Spain,2,Pedri,CM,23,True,78,76,88,90,68,67,87,creator,manual_seed_estimate,2026-06-11
+Spain,2,Unai Simon,GK,29,True,55,21,77,66,85,82,85,sweeper_keeper,manual_seed_estimate,2026-06-11
+Spain,2,Marc Cucurella,LB,27,True,78,55,78,80,82,80,83,full_back,manual_seed_estimate,2026-06-11
+Spain,2,Nico Williams,LW,23,True,93,80,78,88,45,71,85,dribbler,manual_seed_estimate,2026-06-11
+Spain,2,Dani Carvajal,RB,34,True,78,64,82,82,84,82,86,full_back,manual_seed_estimate,2026-06-11
+Spain,2,Lamine Yamal,RW,18,True,86,82,84,90,38,62,86,dribbler,manual_seed_estimate,2026-06-11
+Spain,2,Alvaro Morata,ST,33,True,79,84,76,80,45,79,84,target_man,manual_seed_estimate,2026-06-11
+France,3,Antoine Griezmann,CAM,35,True,76,86,88,88,60,73,88,creator,manual_seed_estimate,2026-06-11
+France,3,Dayot Upamecano,CB,27,True,82,40,73,75,86,87,86,stopper,manual_seed_estimate,2026-06-11
+France,3,William Saliba,CB,25,True,79,41,76,77,88,86,88,ball_playing_cb,manual_seed_estimate,2026-06-11
+France,3,Aurelien Tchouameni,CDM,26,True,72,76,84,81,84,86,86,ball_winner,manual_seed_estimate,2026-06-11
+France,3,Eduardo Camavinga,CM,23,True,80,73,84,86,81,82,86,box_to_box,manual_seed_estimate,2026-06-11
+France,3,Mike Maignan,GK,30,True,58,23,79,68,89,84,89,sweeper_keeper,manual_seed_estimate,2026-06-11
+France,3,Theo Hernandez,LB,28,True,93,76,81,84,79,84,87,wing_back,manual_seed_estimate,2026-06-11
+France,3,Kylian Mbappe,LW,27,True,97,90,83,93,39,78,91,complete_fwd,manual_seed_estimate,2026-06-11
+France,3,Jules Kounde,RB,27,True,82,45,78,77,86,82,86,full_back,manual_seed_estimate,2026-06-11
+France,3,Ousmane Dembele,RW,29,True,92,83,84,90,42,64,87,dribbler,manual_seed_estimate,2026-06-11
+France,3,Marcus Thuram,ST,28,True,88,83,78,85,47,86,85,complete_fwd,manual_seed_estimate,2026-06-11
+England,4,Cole Palmer,CAM,24,True,78,86,85,88,49,68,87,creator,manual_seed_estimate,2026-06-11
+England,4,Jude Bellingham,CAM,22,True,82,86,86,89,79,84,90,box_to_box,manual_seed_estimate,2026-06-11
+England,4,John Stones,CB,32,True,71,55,82,80,85,80,86,ball_playing_cb,manual_seed_estimate,2026-06-11
+England,4,Marc Guehi,CB,25,True,78,38,73,74,84,82,84,stopper,manual_seed_estimate,2026-06-11
+England,4,Declan Rice,CDM,27,True,77,76,85,82,86,88,88,ball_winner,manual_seed_estimate,2026-06-11
+England,4,Jordan Pickford,GK,32,True,55,24,78,65,84,83,84,traditional_gk,manual_seed_estimate,2026-06-11
+England,4,Luke Shaw,LB,30,True,77,66,83,81,81,80,84,full_back,manual_seed_estimate,2026-06-11
+England,4,Phil Foden,LW,26,True,84,85,86,91,58,68,89,creator,manual_seed_estimate,2026-06-11
+England,4,Kyle Walker,RB,36,True,88,60,78,78,82,82,84,full_back,manual_seed_estimate,2026-06-11
+England,4,Bukayo Saka,RW,24,True,86,84,84,89,61,72,88,dribbler,manual_seed_estimate,2026-06-11
+England,4,Harry Kane,ST,32,True,69,91,85,83,50,84,90,complete_fwd,manual_seed_estimate,2026-06-11
+Portugal,5,Bruno Fernandes,CAM,31,True,74,87,90,86,69,76,88,creator,manual_seed_estimate,2026-06-11
+Portugal,5,Antonio Silva,CB,22,True,72,39,75,72,84,82,84,ball_playing_cb,manual_seed_estimate,2026-06-11
+Portugal,5,Ruben Dias,CB,29,True,67,42,74,70,89,88,89,stopper,manual_seed_estimate,2026-06-11
+Portugal,5,Joao Palhinha,CDM,30,True,64,66,76,76,88,89,86,ball_winner,manual_seed_estimate,2026-06-11
+Portugal,5,Vitinha,CM,26,True,75,77,88,88,74,72,87,deep_lying_pm,manual_seed_estimate,2026-06-11
+Portugal,5,Diogo Costa,GK,26,True,60,22,78,67,86,84,86,sweeper_keeper,manual_seed_estimate,2026-06-11
+Portugal,5,Nuno Mendes,LB,24,True,90,63,80,84,80,78,85,wing_back,manual_seed_estimate,2026-06-11
+Portugal,5,Rafael Leao,LW,26,True,94,84,80,89,38,81,86,dribbler,manual_seed_estimate,2026-06-11
+Portugal,5,Diogo Dalot,RB,27,True,83,70,79,81,80,82,84,wing_back,manual_seed_estimate,2026-06-11
+Portugal,5,Bernardo Silva,RW,31,True,79,81,88,91,62,68,88,creator,manual_seed_estimate,2026-06-11
+Portugal,5,Cristiano Ronaldo,ST,41,True,78,89,76,84,34,78,86,poacher,manual_seed_estimate,2026-06-11
+Brazil,6,Gabriel Magalhaes,CB,28,True,75,45,73,71,86,87,86,stopper,manual_seed_estimate,2026-06-11
+Brazil,6,Marquinhos,CB,32,True,76,50,79,78,87,84,87,ball_playing_cb,manual_seed_estimate,2026-06-11
+Brazil,6,Bruno Guimaraes,CM,28,True,72,78,85,84,80,82,86,box_to_box,manual_seed_estimate,2026-06-11
+Brazil,6,Lucas Paqueta,CM,28,True,76,80,84,87,73,78,85,creator,manual_seed_estimate,2026-06-11
+Brazil,6,Alisson,GK,33,True,58,22,78,68,88,86,89,sweeper_keeper,manual_seed_estimate,2026-06-11
+Brazil,6,Guilherme Arana,LB,29,True,80,68,79,82,77,76,82,wing_back,manual_seed_estimate,2026-06-11
+Brazil,6,Vinicius Junior,LW,25,True,96,86,82,92,36,75,90,dribbler,manual_seed_estimate,2026-06-11
+Brazil,6,Danilo,RB,34,True,72,63,78,77,82,82,83,full_back,manual_seed_estimate,2026-06-11
+Brazil,6,Raphinha,RW,29,True,88,84,83,86,55,74,86,pressing_forward,manual_seed_estimate,2026-06-11
+Brazil,6,Rodrygo,RW,25,True,88,85,82,88,39,66,87,complete_fwd,manual_seed_estimate,2026-06-11
+Brazil,6,Endrick,ST,19,True,86,82,72,84,40,78,82,poacher,manual_seed_estimate,2026-06-11
+Morocco,7,Bilal El Khannouss,CAM,22,True,75,75,82,85,56,65,81,creator,manual_seed_estimate,2026-06-11
+Morocco,7,Nayef Aguerd,CB,30,True,75,42,73,70,82,82,82,stopper,manual_seed_estimate,2026-06-11
+Morocco,7,Romain Saiss,CB,36,True,55,55,72,68,80,80,80,stopper,manual_seed_estimate,2026-06-11
+Morocco,7,Sofyan Amrabat,CDM,29,True,69,65,78,78,82,83,82,ball_winner,manual_seed_estimate,2026-06-11
+Morocco,7,Azzedine Ounahi,CM,26,True,76,72,80,84,69,70,80,box_to_box,manual_seed_estimate,2026-06-11
+Morocco,7,Yassine Bounou,GK,35,True,50,22,73,62,86,84,85,traditional_gk,manual_seed_estimate,2026-06-11
+Morocco,7,Noussair Mazraoui,LB,28,True,81,68,82,84,80,77,84,full_back,manual_seed_estimate,2026-06-11
+Morocco,7,Hakim Ziyech,LW,33,True,74,82,86,86,50,66,83,creator,manual_seed_estimate,2026-06-11
+Morocco,7,Achraf Hakimi,RB,27,True,92,76,83,86,80,78,86,wing_back,manual_seed_estimate,2026-06-11
+Morocco,7,Brahim Diaz,RW,26,True,82,81,82,87,47,66,84,creator,manual_seed_estimate,2026-06-11
+Morocco,7,Youssef En-Nesyri,ST,29,True,79,83,68,76,44,84,82,target_man,manual_seed_estimate,2026-06-11
+Netherlands,8,Xavi Simons,CAM,23,True,84,82,84,88,55,67,85,creator,manual_seed_estimate,2026-06-11
+Netherlands,8,Micky van de Ven,CB,25,True,88,43,72,74,84,84,84,stopper,manual_seed_estimate,2026-06-11
+Netherlands,8,Virgil van Dijk,CB,34,True,78,60,74,72,90,88,89,stopper,manual_seed_estimate,2026-06-11
+Netherlands,8,Frenkie de Jong,CM,29,True,79,76,88,88,78,76,88,deep_lying_pm,manual_seed_estimate,2026-06-11
+Netherlands,8,Tijjani Reijnders,CM,27,True,78,79,84,85,74,76,85,box_to_box,manual_seed_estimate,2026-06-11
+Netherlands,8,Bart Verbruggen,GK,23,True,56,20,75,65,82,82,82,sweeper_keeper,manual_seed_estimate,2026-06-11
+Netherlands,8,Nathan Ake,LB,31,True,76,58,79,79,84,80,84,full_back,manual_seed_estimate,2026-06-11
+Netherlands,8,Cody Gakpo,LW,27,True,84,84,82,85,48,78,86,complete_fwd,manual_seed_estimate,2026-06-11
+Netherlands,8,Denzel Dumfries,RB,30,True,83,75,76,78,80,86,83,wing_back,manual_seed_estimate,2026-06-11
+Netherlands,8,Jeremie Frimpong,RW,25,True,94,75,79,86,72,72,84,wing_back,manual_seed_estimate,2026-06-11
+Netherlands,8,Memphis Depay,ST,32,True,79,84,82,85,38,74,84,false_nine,manual_seed_estimate,2026-06-11
+Belgium,9,Kevin De Bruyne,CAM,34,True,73,87,93,88,64,74,90,creator,manual_seed_estimate,2026-06-11
+Belgium,9,Arthur Theate,CB,26,True,70,44,72,70,80,82,80,stopper,manual_seed_estimate,2026-06-11
+Belgium,9,Wout Faes,CB,28,True,67,38,70,68,80,82,80,stopper,manual_seed_estimate,2026-06-11
+Belgium,9,Amadou Onana,CDM,24,True,75,70,78,79,82,88,83,ball_winner,manual_seed_estimate,2026-06-11
+Belgium,9,Youri Tielemans,CM,29,True,67,80,84,82,74,77,83,deep_lying_pm,manual_seed_estimate,2026-06-11
+Belgium,9,Thibaut Courtois,GK,34,True,47,20,74,60,90,86,90,traditional_gk,manual_seed_estimate,2026-06-11
+Belgium,9,Maxim De Cuyper,LB,25,True,78,68,78,80,75,73,79,wing_back,manual_seed_estimate,2026-06-11
+Belgium,9,Jeremy Doku,LW,24,True,91,78,78,90,39,69,84,dribbler,manual_seed_estimate,2026-06-11
+Belgium,9,Timothy Castagne,RB,30,True,78,63,76,78,78,78,80,full_back,manual_seed_estimate,2026-06-11
+Belgium,9,Leandro Trossard,RW,31,True,78,82,82,86,50,68,84,creator,manual_seed_estimate,2026-06-11
+Belgium,9,Romelu Lukaku,ST,33,True,79,86,76,78,42,88,85,target_man,manual_seed_estimate,2026-06-11
+Germany,10,Florian Wirtz,CAM,23,True,80,84,88,90,60,70,89,creator,manual_seed_estimate,2026-06-11
+Germany,10,Jamal Musiala,CAM,23,True,85,84,84,91,54,69,88,dribbler,manual_seed_estimate,2026-06-11
+Germany,10,Antonio Rudiger,CB,33,True,82,55,72,71,87,88,87,stopper,manual_seed_estimate,2026-06-11
+Germany,10,Jonathan Tah,CB,30,True,76,42,74,72,85,86,85,stopper,manual_seed_estimate,2026-06-11
+Germany,10,Robert Andrich,CDM,31,True,64,72,78,77,82,86,82,ball_winner,manual_seed_estimate,2026-06-11
+Germany,10,Ilkay Gundogan,CM,35,True,66,81,87,86,72,72,85,deep_lying_pm,manual_seed_estimate,2026-06-11
+Germany,10,Marc-Andre ter Stegen,GK,34,True,54,22,84,70,88,84,89,sweeper_keeper,manual_seed_estimate,2026-06-11
+Germany,10,David Raum,LB,28,True,82,66,81,82,76,78,82,wing_back,manual_seed_estimate,2026-06-11
+Germany,10,Joshua Kimmich,RB,31,True,70,76,89,84,82,78,88,inverted_full_back,manual_seed_estimate,2026-06-11
+Germany,10,Leroy Sane,RW,30,True,90,84,81,87,44,72,86,dribbler,manual_seed_estimate,2026-06-11
+Germany,10,Kai Havertz,ST,27,True,78,83,82,84,61,80,86,false_nine,manual_seed_estimate,2026-06-11

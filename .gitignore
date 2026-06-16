@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.streamlit/secrets.toml
+data/raw/*
+data/processed/*
+data/squads/*
+!data/raw/.gitkeep
+!data/raw/fifa_rankings_top10_*.csv
+!data/raw/fifa_style_player_ratings_top10.csv
+!data/raw/fbref_team_sources.csv
+!data/processed/.gitkeep
+!data/squads/.gitkeep
