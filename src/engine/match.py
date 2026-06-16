@@ -37,31 +37,23 @@ class MatchSimulator:
 
         home_possession_tendency = self._compute_possession_tendency()
 
-        while self.state.minute < 90:
-            chain_duration, events = self._simulate_possession_chain(
-                self.state.possession_team,
-                self.state.current_zone,
-                home_possession_tendency,
+        self._simulate_period(period_end=45, home_possession_tendency=home_possession_tendency)
+        self._half_time_recorded = True
+        self.state.events.append(
+            MatchEvent(
+                minute=45,
+                event_type=EventType.HALF_TIME,
+                team="",
+                player_name="",
+                zone=PitchZone.MID_CENTER,
+                success=True,
+                description=f"Babak pertama: {self.home.name} {self.state.home_goals} - {self.state.away_goals} {self.away.name}",
             )
+        )
 
-            self.state.events.extend(events)
-            self._record_possession_time(self.state.possession_team, chain_duration)
-            self.state.minute = min(90, self.state.minute + chain_duration)
-            self._update_possession_stats()
-
-            if self.state.minute >= 45 and not self._half_time_recorded:
-                self._half_time_recorded = True
-                self.state.events.append(
-                    MatchEvent(
-                        minute=45,
-                        event_type=EventType.HALF_TIME,
-                        team="",
-                        player_name="",
-                        zone=PitchZone.MID_CENTER,
-                        success=True,
-                        description=f"Babak pertama: {self.home.name} {self.state.home_goals} - {self.state.away_goals} {self.away.name}",
-                    )
-                )
+        self.state.minute = 46
+        self.state.current_zone = PitchZone.MID_CENTER
+        self._simulate_period(period_end=90, home_possession_tendency=home_possession_tendency)
 
         self.state.minute = 90
         self.state.events.append(
@@ -77,11 +69,27 @@ class MatchSimulator:
         )
         return self.state
 
+    def _simulate_period(self, period_end: int, home_possession_tendency: float) -> None:
+        while self.state.minute < period_end:
+            possession_team = self.state.possession_team
+            chain_duration, events = self._simulate_possession_chain(
+                possession_team,
+                self.state.current_zone,
+                home_possession_tendency,
+                max_minute=period_end - 1,
+            )
+
+            self.state.events.extend(events)
+            self._record_possession_time(possession_team, chain_duration)
+            self.state.minute = min(period_end, self.state.minute + chain_duration)
+            self._update_possession_stats()
+
     def _simulate_possession_chain(
         self,
         possession_team: str,
         start_zone: PitchZone,
         home_possession_tendency: float,
+        max_minute: int,
     ) -> tuple[int, list[MatchEvent]]:
         events: list[MatchEvent] = []
         current_zone = start_zone
@@ -90,6 +98,9 @@ class MatchSimulator:
         opponent = self.away if team.name == self.home.name else self.home
 
         for _ in range(8):
+            if chain_minute > max_minute:
+                break
+
             player = team.get_player_in_zone(current_zone, self.rng)
             action = self._choose_action(player, team, current_zone)
 
@@ -138,14 +149,14 @@ class MatchSimulator:
     def _choose_action(self, player, team: Team, zone: PitchZone) -> str:
         zone_probs = {
             PitchZone.DEF_LEFT: {"pass": 0.82, "dribble": 0.15, "shoot": 0.03},
-            PitchZone.DEF_CENTER: {"pass": 0.88, "dribble": 0.10, "shoot": 0.02},
+            PitchZone.DEF_CENTER: {"pass": 0.88, "dribble": 0.11, "shoot": 0.01},
             PitchZone.DEF_RIGHT: {"pass": 0.82, "dribble": 0.15, "shoot": 0.03},
-            PitchZone.MID_LEFT: {"pass": 0.68, "dribble": 0.25, "shoot": 0.07},
-            PitchZone.MID_CENTER: {"pass": 0.68, "dribble": 0.22, "shoot": 0.10},
-            PitchZone.MID_RIGHT: {"pass": 0.68, "dribble": 0.25, "shoot": 0.07},
-            PitchZone.ATT_LEFT: {"pass": 0.46, "dribble": 0.30, "shoot": 0.24},
-            PitchZone.ATT_CENTER: {"pass": 0.36, "dribble": 0.22, "shoot": 0.42},
-            PitchZone.ATT_RIGHT: {"pass": 0.46, "dribble": 0.30, "shoot": 0.24},
+            PitchZone.MID_LEFT: {"pass": 0.70, "dribble": 0.25, "shoot": 0.05},
+            PitchZone.MID_CENTER: {"pass": 0.70, "dribble": 0.23, "shoot": 0.07},
+            PitchZone.MID_RIGHT: {"pass": 0.70, "dribble": 0.25, "shoot": 0.05},
+            PitchZone.ATT_LEFT: {"pass": 0.52, "dribble": 0.30, "shoot": 0.18},
+            PitchZone.ATT_CENTER: {"pass": 0.44, "dribble": 0.24, "shoot": 0.32},
+            PitchZone.ATT_RIGHT: {"pass": 0.52, "dribble": 0.30, "shoot": 0.18},
         }
         probs = dict(zone_probs[zone])
 
@@ -231,28 +242,38 @@ class MatchSimulator:
         )
 
     def _resolve_shot(self, player, team: Team, opponent: Team, zone: PitchZone, minute: int) -> tuple[MatchEvent, bool]:
-        zone_modifier = {
-            PitchZone.ATT_CENTER: 1.14,
-            PitchZone.ATT_LEFT: 0.92,
-            PitchZone.ATT_RIGHT: 0.92,
-            PitchZone.MID_CENTER: 0.62,
-        }.get(zone, 0.55)
-        shot_quality = float(np.clip(player.shot_accuracy_mean * zone_modifier, 0.05, 0.86))
-        on_target = bool(self.rng.random() < shot_quality)
+        xg = self._expected_goal_value(player, team, opponent, zone)
+        on_target_probability = self._shot_on_target_probability(player, zone)
+        on_target = bool(self.rng.random() < on_target_probability)
         save_rate = self._goalkeeper_save_rate(opponent)
-        scored = bool(on_target and self.rng.random() > save_rate)
+        goal_probability_if_on_target = float(np.clip((xg / max(on_target_probability, 0.01)) * (0.90 / save_rate), 0.03, 0.55))
+        scored = bool(on_target and self.rng.random() < goal_probability_if_on_target)
+        blocked = bool(not on_target and self.rng.random() < self._blocked_shot_probability(opponent, zone))
 
         if team.name == self.home.name:
             self.state.home_shots += 1
+            self.state.home_xg += xg
             if on_target:
                 self.state.home_shots_on_target += 1
         else:
             self.state.away_shots += 1
+            self.state.away_xg += xg
             if on_target:
                 self.state.away_shots_on_target += 1
 
-        event_type = EventType.GOAL if scored else EventType.SAVE if on_target else EventType.MISS
-        description = f"{player.name} mencetak gol!" if scored else f"Tembakan {player.name} diselamatkan" if on_target else f"Tembakan {player.name} melenceng"
+        if scored:
+            event_type = EventType.GOAL
+            description = f"{player.name} mencetak gol!"
+        elif on_target:
+            event_type = EventType.SAVE
+            description = f"Tembakan {player.name} diselamatkan"
+        elif blocked:
+            event_type = EventType.BLOCKED
+            description = f"Tembakan {player.name} diblok"
+        else:
+            event_type = EventType.MISS
+            description = f"Tembakan {player.name} melenceng"
+
         return (
             MatchEvent(
                 minute=minute,
@@ -262,10 +283,60 @@ class MatchSimulator:
                 zone=zone,
                 success=scored,
                 description=description,
-                extra={"shot_quality": round(shot_quality, 3), "on_target": on_target},
+                extra={
+                    "xg": round(xg, 3),
+                    "on_target_probability": round(on_target_probability, 3),
+                    "on_target": on_target,
+                    "save_rate": round(save_rate, 3),
+                },
             ),
             scored,
         )
+
+    def _expected_goal_value(self, player, team: Team, opponent: Team, zone: PitchZone) -> float:
+        base_xg = {
+            PitchZone.ATT_CENTER: 0.15,
+            PitchZone.ATT_LEFT: 0.08,
+            PitchZone.ATT_RIGHT: 0.08,
+            PitchZone.MID_CENTER: 0.035,
+            PitchZone.MID_LEFT: 0.018,
+            PitchZone.MID_RIGHT: 0.018,
+            PitchZone.DEF_LEFT: 0.006,
+            PitchZone.DEF_CENTER: 0.006,
+            PitchZone.DEF_RIGHT: 0.006,
+        }[zone]
+        shooter_factor = 0.72 + (player.stats.shooting / 220)
+        matchup_factor = float(np.clip(team.attacking_quality / max(opponent.defensive_quality, 1), 0.82, 1.18))
+
+        style_factor = 1.0
+        if player.playstyle == PlayStyle.POACHER and zone == PitchZone.ATT_CENTER:
+            style_factor = 1.16
+        elif player.playstyle == PlayStyle.COMPLETE_FORWARD:
+            style_factor = 1.08
+        elif player.playstyle == PlayStyle.TARGET_MAN:
+            style_factor = 1.05
+
+        return float(np.clip(base_xg * shooter_factor * matchup_factor * style_factor, 0.003, 0.34))
+
+    def _shot_on_target_probability(self, player, zone: PitchZone) -> float:
+        zone_bonus = {
+            PitchZone.ATT_CENTER: 0.10,
+            PitchZone.ATT_LEFT: 0.04,
+            PitchZone.ATT_RIGHT: 0.04,
+            PitchZone.MID_CENTER: -0.07,
+            PitchZone.MID_LEFT: -0.11,
+            PitchZone.MID_RIGHT: -0.11,
+            PitchZone.DEF_LEFT: -0.18,
+            PitchZone.DEF_CENTER: -0.18,
+            PitchZone.DEF_RIGHT: -0.18,
+        }[zone]
+        probability = 0.18 + (player.stats.shooting / 100) * 0.26 + zone_bonus
+        return float(np.clip(probability, 0.06, 0.62))
+
+    def _blocked_shot_probability(self, opponent: Team, zone: PitchZone) -> float:
+        defensive_shape = opponent.defensive_quality / 100
+        central_bonus = 0.08 if zone == PitchZone.ATT_CENTER else 0.03
+        return float(np.clip(0.16 + defensive_shape * 0.18 + central_bonus, 0.16, 0.42))
 
     def _compute_possession_tendency(self) -> float:
         home_quality = self.home.passing_quality + (self.home.tactical_config.tempo * 6)

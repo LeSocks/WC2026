@@ -26,6 +26,7 @@ class EventType(Enum):
     GOAL = "goal"
     SAVE = "save"
     MISS = "miss"
+    BLOCKED = "blocked"
     HALF_TIME = "half_time"
     FULL_TIME = "full_time"
 
@@ -55,3 +56,5 @@ class MatchState:
     away_shots: int = 0
     home_shots_on_target: int = 0
     away_shots_on_target: int = 0
+    home_xg: float = 0.0
+    away_xg: float = 0.0

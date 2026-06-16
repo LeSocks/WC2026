@@ -36,6 +36,13 @@ Agent-based football simulation and World Cup 2026 tournament predictor.
 - Resolve pass, dribble, interception, tackle, shot, save, miss, and goal events.
 - Add a terminal command for running one simulated match with an event log.
 
+## Day 6 Scope
+
+- Tune shot selection and shot resolution toward realistic match totals.
+- Track xG for both teams.
+- Add blocked shots and separate on-target probability from goal probability.
+- Fix half-time ordering and possession-time attribution.
+
 ## Setup
 
 ```powershell
@@ -93,4 +100,10 @@ Run one simulated match:
 
 ```powershell
 python -m src.engine.run_match France Morocco --seed 42
+```
+
+Run a quick distribution check:
+
+```powershell
+python -c "from src.data.loader import load_team; from src.engine.match import MatchSimulator; h=load_team('France'); a=load_team('Morocco'); print([MatchSimulator(h,a,rng_seed=i).simulate().home_goals for i in range(5)])"
 ```

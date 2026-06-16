@@ -13,6 +13,9 @@ def test_match_simulator_runs_full_match() -> None:
     assert state.home_goals >= 0
     assert state.away_goals >= 0
     assert state.home_shots + state.away_shots > 0
+    assert state.home_xg + state.away_xg > 0
+    assert state.home_shots_on_target <= state.home_shots
+    assert state.away_shots_on_target <= state.away_shots
     assert 0 <= state.home_possession_pct <= 100
     assert state.events[0].event_type == EventType.KICKOFF
     assert state.events[-1].event_type == EventType.FULL_TIME
@@ -35,3 +38,12 @@ def test_match_event_log_contains_terminal_scoreline() -> None:
     state = MatchSimulator(load_team("Spain"), load_team("Brazil"), rng_seed=11).simulate()
 
     assert f"Spain {state.home_goals} - {state.away_goals} Brazil" in state.events[-1].description
+
+
+def test_half_time_is_logged_before_second_half_events() -> None:
+    state = MatchSimulator(load_team("France"), load_team("Morocco"), rng_seed=42).simulate()
+    half_time_index = next(index for index, event in enumerate(state.events) if event.event_type == EventType.HALF_TIME)
+
+    assert state.events[half_time_index].minute == 45
+    assert all(event.minute <= 45 for event in state.events[: half_time_index + 1])
+    assert all(event.minute >= 46 for event in state.events[half_time_index + 1 : -1])

@@ -22,6 +22,7 @@ def main() -> None:
         f"Shots: {state.home_shots} ({state.home_shots_on_target} on target) - "
         f"{state.away_shots} ({state.away_shots_on_target} on target)"
     )
+    print(f"xG: {state.home_xg:.2f} - {state.away_xg:.2f}")
     print(f"Home possession: {state.home_possession_pct:.1f}%")
     print("Key events:")
     for event in state.events:
