@@ -43,6 +43,12 @@ Agent-based football simulation and World Cup 2026 tournament predictor.
 - Add blocked shots and separate on-target probability from goal probability.
 - Fix half-time ordering and possession-time attribution.
 
+## Day 7 Scope
+
+- Add repeatable match-distribution diagnostics.
+- Run top-10 matchup samples to check goals, shots, SOT, xG, and high-score outliers.
+- Add a short development journal under `docs/`.
+
 ## Setup
 
 ```powershell
@@ -106,4 +112,10 @@ Run a quick distribution check:
 
 ```powershell
 python -c "from src.data.loader import load_team; from src.engine.match import MatchSimulator; h=load_team('France'); a=load_team('Morocco'); print([MatchSimulator(h,a,rng_seed=i).simulate().home_goals for i in range(5)])"
+```
+
+Run Day 7 diagnostics:
+
+```powershell
+python -m src.engine.diagnostics --runs-per-pair 20
 ```
