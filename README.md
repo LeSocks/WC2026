@@ -1,6 +1,8 @@
-# WC2026 Tactical Match Simulator
+# WC2026 Custom Football MARL Environment
 
-Agent-based football simulation and World Cup 2026 tournament predictor.
+A custom football MARL environment seeded with real national-team metadata, used to learn tactical policies and compare them against rule-based football simulation baselines for WC2026 scenarios.
+
+The original tactical simulator remains in the project as the world model, data layer, tactical prior, and evaluation baseline. The research direction from Day 10 onward is full custom 11v11-compatible MARL, trained locally through a curriculum from lightweight tactical controllers toward shared role policies.
 
 ## Day 1 Scope
 
@@ -61,6 +63,46 @@ Agent-based football simulation and World Cup 2026 tournament predictor.
 - Generate Tier 1 starter data for all teams into `data/processed/`.
 - Keep top-10 manual seed data and use generated team-profile placeholders for the remaining teams.
 
+## Day 10 Scope
+
+- Add `src/rl/` as the custom football MARL layer.
+- Implement `FootballEnv.reset()` and `FootballEnv.step(actions)` with 22 agent slots from the start.
+- Add compact per-agent observations, high-level discrete actions, and shaped rewards.
+- Add tactical, random, tabular Q-learning, self-play, and evaluation scaffolds.
+- Keep the existing rule-based `MatchSimulator` as a benchmark and regression guard.
+
+## Day 11 Scope
+
+- Add observable team-controller training for local compute.
+- Log readable terminal progress plus CSV, JSONL, config, and checkpoint files.
+- Support checkpoint resume for long-running tabular Q-learning runs.
+- Add simple reward-hacking warnings for shot spam, stale possession, and reward without chance quality.
+
+## Day 12 Scope
+
+- Add policy evaluation against random, tactical preset, self-play, and rule-based simulator baselines.
+- Load `checkpoint.json` from observable training runs.
+- Write readable `evaluation.json` and `evaluation.csv` reports.
+- Use changing seeds per evaluation episode so reports are not repeated identical matches.
+
+## Day 13 Scope
+
+- Add role-group tabular MARL for `defense`, `midfield`, and `attack` shared policies.
+- Keep the same observable training outputs and JSON checkpoint format.
+- Allow `evaluate_policy` to evaluate role-group checkpoints with the same baseline harness.
+- Keep team-controller training available as the recommended first long-run curriculum.
+
+## MARL Roadmap
+
+- Day 10: RL environment contract: reset, step, observations, actions, rewards.
+- Day 11: Single-team tactical controller training loop.
+- Day 12: Self-play/evaluation harness and baseline policies.
+- Day 13: Role-group MARL for defense, midfield, and attack shared policies.
+- Day 14: 5v5 curriculum scenario and reward tuning.
+- Day 15: 11v11-compatible training path with shared role policies.
+- Day 16: Compare learned policies against rule-based tactical presets.
+- Day 17+: Tournament simulation can use either rule-based or learned policies.
+
 ## Setup
 
 ```powershell
@@ -81,6 +123,7 @@ data/
 src/
   models/
   engine/
+  rl/
   viz/
   data/
 app/
@@ -120,6 +163,36 @@ Run one simulated match:
 python -m src.engine.run_match France Morocco --seed 42
 ```
 
+Run one lightweight RL environment episode:
+
+```powershell
+python -m src.rl.run_episode France Morocco --seed 42 --steps 12
+```
+
+Run observable team-controller training:
+
+```powershell
+python -m src.rl.train_controller France Morocco --episodes 500 --seed 42 --log-interval 25 --checkpoint-interval 100
+```
+
+Run observable role-group training:
+
+```powershell
+python -m src.rl.train_role_groups France Morocco --episodes 500 --seed 42 --log-interval 25 --checkpoint-interval 100
+```
+
+Resume a training run:
+
+```powershell
+python -m src.rl.train_controller France Morocco --episodes 1000 --resume training_runs\<run_id>\checkpoint.json
+```
+
+Evaluate a trained checkpoint:
+
+```powershell
+python -m src.rl.evaluate_policy France Morocco --checkpoint training_runs\<run_id>\checkpoint.json --episodes 100 --seed 10000
+```
+
 Run a quick distribution check:
 
 ```powershell
@@ -149,3 +222,33 @@ Check default full dataset loading:
 ```powershell
 python -c "from src.data.loader import load_all_teams, load_players; print(len(load_all_teams()), len(load_players()))"
 ```
+
+Run a small tabular training smoke test:
+
+```powershell
+python -c "from src.data.loader import load_team; from src.rl.env import FootballEnv; from src.rl.trainer import TabularQTrainer; env=FootballEnv(load_team('France'), load_team('Morocco'), rng_seed=42, max_minutes=12); policy,result=TabularQTrainer().train_team_controller(env, episodes=3); print(result.mean_reward, len(policy.q_values))"
+```
+
+Training logs are written under `training_runs/` by default:
+
+- `metrics.csv`: episode-level metrics for spreadsheet or pandas analysis.
+- `events.jsonl`: readable JSON lines for per-episode audit trails.
+- `config.json`: teams, seed, hyperparameters, and git commit when available.
+- `checkpoint.json`: portable Q-table checkpoint for resume and inspection.
+
+Role-group checkpoints use the same filename but contain separate Q-tables for `defense`, `midfield`, and `attack`.
+
+Evaluation reports are written under `evaluation_runs/` by default:
+
+- `evaluation.json`: metadata plus structured results.
+- `evaluation.csv`: compact comparison table for pandas, spreadsheet, or notebook analysis.
+
+## Research Notes
+
+- The environment is 11v11-compatible at the API level, but local-compute training should start with team-controller and role-group curricula before full 11v11 shared policies.
+- Discrete high-level actions are deliberate: `hold`, `safe_pass`, `progressive_pass`, `switch_play`, `dribble`, `shoot`, `press`, `drop`, `mark`, and `clear`.
+- Evaluation should report learned policy results against random policy, tactical-preset policy, mirrored self-play, and the existing rule-based match simulator.
+- Long local training runs should be monitored through `reward_ma_20`, xG difference, action distribution, and reward-hacking warnings instead of reward alone.
+- A serious long run should follow this loop: train with `train_controller`, inspect `metrics.csv`, evaluate the checkpoint with `evaluate_policy`, then resume or tune.
+- Prefer the long-run order: team-controller first, role-group second, 5v5 curriculum third.
+- References: Google Research Football (`https://arxiv.org/abs/1907.11180`) and later GRF MARL benchmark discussion (`https://arxiv.org/abs/2309.12951`).

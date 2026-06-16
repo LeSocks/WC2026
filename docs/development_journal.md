@@ -73,6 +73,40 @@ Short build journal for the first week. The goal is to preserve the main trials,
 - Fix: wrote `src/data/seed_48_teams.py` to generate `data/processed/all_teams.json` and `data/processed/all_players_48.csv` reproducibly.
 - Result: loader defaults now return 48 teams and 528 players when processed data exists.
 
+## Day 10 - Custom MARL Environment Pivot
+
+- Scope: pivoted the project from a tactical simulator into a custom football MARL research environment while keeping the existing simulator as a benchmark.
+- Trial: added `src/rl/` with high-level actions, compact observations, shaped rewards, `FootballEnv.reset()`, `FootballEnv.step(actions)`, baseline policies, tabular Q-learning, self-play, and evaluation scaffolds.
+- Decision: expose 22 agent slots from the start, but train locally through curriculum stages instead of pretending full 11v11 from scratch will converge immediately.
+- Error avoided: did not replace the stable rule-based match engine; it remains a deterministic baseline and regression guard.
+- Risk: reward hacking is likely if shooting, passing, and pressure rewards are not monitored through diagnostics.
+- Result: RL environment tests pass, and both `python -m src.engine.run_match France Morocco --seed 42` and `python -m src.rl.run_episode France Morocco --seed 42 --steps 5` run successfully.
+
+## Day 11 - Observable Team-Controller Training
+
+- Scope: added a local-compute training path that is observable through terminal summaries and readable files.
+- Trial: created `TrainingLogger`, `train_controller` CLI, episode metrics, JSON checkpoints, and resume support.
+- Decision: kept logging dependency-free with CSV, JSONL, and JSON so long runs can be inspected without TensorBoard or W&B.
+- Error avoided: did not optimize for GPU training yet; the current bottleneck is formulation and diagnostics, not neural network throughput.
+- Guardrail: added warnings for shot spam, stale possession, and reward gains that do not create chance quality.
+- Result: training runs now write `metrics.csv`, `events.jsonl`, `config.json`, and `checkpoint.json` under `training_runs/`.
+
+## Day 12 - Evaluation and Baseline Harness
+
+- Scope: added a checkpoint evaluation path so training runs can be compared against baselines instead of judged by reward alone.
+- Trial: added `evaluate_policy` CLI and report writing for `evaluation.json` and `evaluation.csv`.
+- Decision: compare learned checkpoints against random policy, tactical preset policy, mirrored learned self-play, and the rule-based `MatchSimulator`.
+- Fix: evaluation factories can now vary seeds per episode, avoiding repeated identical match samples.
+- Result: the project now has a train -> observe -> checkpoint -> evaluate loop suitable for long local runs and notebook analysis.
+
+## Day 13 - Role-Group MARL
+
+- Scope: added lightweight role-group training for shared `defense`, `midfield`, and `attack` tabular policies.
+- Trial: added `RoleGroupPolicy`, `train_role_groups` CLI, role-group checkpoint serialization, resume support, and evaluation compatibility.
+- Decision: keep role-group training as the second curriculum step after team-controller training, not as the first long run.
+- Error avoided: did not start long training automatically; only short smoke runs and tests should be run by automation.
+- Result: role-group checkpoints can now be trained, resumed, and evaluated through the same report pipeline.
+
 ## Git and Account Notes
 
 - Initial commit was rewritten because the Git author used the old GitHub identity.
